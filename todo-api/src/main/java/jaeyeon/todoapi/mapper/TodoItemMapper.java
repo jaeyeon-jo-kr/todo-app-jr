@@ -9,13 +9,13 @@ import java.util.List;
 public interface TodoItemMapper
 {
     @Select("SELECT id FROM TodoItem")
-    List<Long> selectAllIds();
+    List<Integer> selectAllIds();
 
     @Select("SELECT * FROM TodoItem")
     List<TodoItem> selectAllItems();
 
     @Select("SELECT * FROM TodoItem WHERE id #{id}")
-    TodoItem getItem(long id);
+    TodoItem getItem(Integer id);
 
     @Update("Update TodoItem SET title=#{title}, toggled = #{toggled} WHERE id = #{id}")
     int updateItem(TodoItem item);
@@ -24,13 +24,20 @@ public interface TodoItemMapper
     void insertItem(TodoItem item);
 
     @Select("Select LAST_INSERT_ID()")
-    long getLastInsertId();
+    Integer getLastInsertId();
+
+    @Insert("INSERT INTO TodoItemRemoved(id, title, description, toggled, created_at, updated_at)" +
+            "SELECT id, title, description, toggled, created_at, updated_at " +
+            "FROM TodoItem WHERE id = #{id}")
+    void moveToTrash(Integer id);
 
     @Update("DELETE FROM TodoItem WHERE id = #{id}")
-    int deleteItem(Long id);
+    int deleteItem(Integer id);
 
     @Update("Update TodoItem SET toggled = !toggled WHERE id = #{id}")
     int toggle(int id);
+
+
 
 
 

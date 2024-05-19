@@ -2,6 +2,8 @@ package jaeyeon.todoapi.controller;
 
 import jaeyeon.todoapi.mapper.TodoItemMapper;
 import jaeyeon.todoapi.domain.TodoItem;
+import jaeyeon.todoapi.service.TodoItemService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,13 +12,16 @@ import java.util.List;
 @RestController
 public class TodoItemController {
     private TodoItemMapper mapper;
+    private TodoItemService service;
 
-    public TodoItemController(TodoItemMapper mapper){
+    public TodoItemController(TodoItemMapper mapper, TodoItemService service)
+    {
         this.mapper = mapper;
+        this.service = service;
     }
 
     @GetMapping("/all-ids")
-    public List<Long> getAllIds(){
+    public List<Integer> getAllIds(){
         return this.mapper.selectAllIds();
     }
 
@@ -26,7 +31,7 @@ public class TodoItemController {
     }
 
     @GetMapping("/{id}")
-    public TodoItem getAllItems(@PathVariable long id){
+    public TodoItem getAllItems(@PathVariable int id){
         return this.mapper.getItem(id);
     }
 
@@ -37,20 +42,14 @@ public class TodoItemController {
     }
 
     @PostMapping("/delete")
-    public int deleteItem(long id)
+    public int deleteItem(int id)
     {
-        return this.mapper.deleteItem(id);
+        return this.service.RemoveItem(id);
 
-    }
-
-    @PostMapping("/toggle")
-    public int toogleId(int id){
-        return this.mapper.toggle(id);
     }
 
     @PostMapping("/new")
-    public Long insertItem(TodoItem item){
-        this.mapper.insertItem(item);
-        return this.mapper.getLastInsertId();
+    public int insertItem(TodoItem item){
+        return this.service.insertItem(item);
     }
 }

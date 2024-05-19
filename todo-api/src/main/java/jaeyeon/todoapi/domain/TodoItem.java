@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @Data
 public class TodoItem implements Serializable {
@@ -13,4 +14,6 @@ public class TodoItem implements Serializable {
     String title;
     String description;
     boolean toggled;
+    Timestamp created_at;
+    Timestamp updated_at;
 }

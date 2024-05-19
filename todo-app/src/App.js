@@ -111,16 +111,15 @@ function EditedTitle({ item, setEditFocus, onChangeTask }) {
       }}
       onBlur={() => setEditFocus(null)}
       defaultValue={item.title}
-      size={15}
-      maxLength={15}
+      size={16}
+      maxLength={16}
     ></input>
   );
 }
 
 function UntoggledItemTitle({ item, setEditFocus }) {
   return (
-    <label
-      htmlFor={"item-" + item.id}
+    <div
       className="untoggled-item"
       onClick={() => {
         setEditFocus(item.id);
@@ -128,7 +127,7 @@ function UntoggledItemTitle({ item, setEditFocus }) {
       id="title"
     >
       {item.title}
-    </label>
+    </div>
   );
 }
 function ToggledItemTitle({ item, setEditFocus }) {
@@ -167,7 +166,64 @@ function ItemTitle({ item, onChangeTask, editFocus, setEditFocus }) {
   );
 }
 
+function toDateTimeLocalString(datetime) {
+  const year = datetime.getFullYear();
+  const month = datetime.getMonth();
+  const date1 = datetime.getDate();
+  const hour = datetime.getHours();
+  const minute = datetime.getMinutes();
+  const monthStr = (month < 10 ? "0" : "") + month;
+  const date1Str = (date1 < 10 ? "0" : "") + date1;
+  const hourStr = (hour < 10 ? "0" : "") + hour;
+  const minuteStr = (minute < 10 ? "0" : "") + minute;
+  return (
+    year + "-" + monthStr + "-" + date1Str + "T" + hourStr + ":" + minuteStr
+  );
+}
+
+function Alarm() {
+  const [alarmTime, setAlarmTime] = useState(toDateTimeLocalString(new Date()));
+
+  useEffect(() => {
+    let time = toDateTimeLocalString(new Date());
+    setAlarmTime(time);
+  }, []);
+
+  return (
+    <input
+      type="datetime-local"
+      value={alarmTime}
+      onChange={(e) => {
+        setAlarmTime(e.target.value);
+      }}
+    ></input>
+  );
+}
+
+function Description({item, onChangeTask}){
+  const [description, setDescription] = useState(item.description)
+  return <>
+  <label htmlFor={"desc-" + item.id}>Todo Description</label>
+  <br/>
+  <textarea id={"desc-" + item.id} 
+  onChange={e => setDescription(e.target.value)}>{description}</textarea>
+  <br/>
+  <input type="button" value="Save"
+  onClick={e => {onChangeTask({...item, description})}}
+  ></input>
+  </>
+}
+
+function Details({item, detailActivated, onChangeTask}){
+   return detailActivated? (<><br/>
+   <Description item={item} onChangeTask={onChangeTask}></Description></>) : <></>;
+}
+
+
+
 function Item({ item, onChangeTask, onDeleteTask, editFocus, setEditFocus }) {
+  const [detailActivated,setDetailActivated] = useState(false);
+  
   return (
     <li key={item.id} id={"item-" + item.id}>
       <input
@@ -187,23 +243,28 @@ function Item({ item, onChangeTask, onDeleteTask, editFocus, setEditFocus }) {
         editFocus={editFocus}
         setEditFocus={setEditFocus}
       ></ItemTitle>
+      <input type="button" value={detailActivated?"▲":"▼"}
+      onClick={() => setDetailActivated(!detailActivated)}></input>
       <input
         type="button"
         value="delete"
         // class="delete-button"
         onClick={() => onDeleteTask(item)}
       ></input>
+      <Details item={item} detailActivated={detailActivated} onChangeTask={onChangeTask}></Details>
     </li>
   );
 }
 
-function ItemsList({ items, onChangeTask, onDeleteTask }) {
+function ItemList({ items, onChangeTask, onDeleteTask }) {
   const [editFocus, setEditFocus] = useState(null);
+  
   return (
     <ul>
       {items.map((item) =>
-        Item({ item, onChangeTask, onDeleteTask, editFocus, setEditFocus })
-      )}
+      {return (<Item item={item} onChangeTask={onChangeTask} onDeleteTask={onDeleteTask} 
+        editFocus={editFocus} 
+         setEditFocus={setEditFocus}/>)})}
     </ul>
   );
 }
@@ -265,7 +326,7 @@ function App() {
       ) : error ? (
         <div>There is an Error</div>
       ) : (
-        <ItemsList
+        <ItemList
           items={items}
           onChangeTask={handleChangeItem}
           onDeleteTask={handleDeleteItem}
