@@ -17,10 +17,10 @@ public interface TodoItemMapper
     @Select("SELECT * FROM TodoItem WHERE id #{id}")
     TodoItem getItem(Integer id);
 
-    @Update("Update TodoItem SET title=#{title}, toggled = #{toggled} WHERE id = #{id}")
+    @Update("Update TodoItem SET title=#{title}, toggled = #{toggled}, description=#{description}  WHERE id = #{id}")
     int updateItem(TodoItem item);
 
-    @Insert("INSERT INTO TodoItem(title, toggled) VALUES(#{title},#{toggled});")
+    @Insert("INSERT INTO TodoItem(title, toggled,description) VALUES(#{title},#{toggled}, #{description});")
     void insertItem(TodoItem item);
 
     @Select("Select LAST_INSERT_ID()")
