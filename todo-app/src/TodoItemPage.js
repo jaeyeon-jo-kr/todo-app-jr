@@ -1,24 +1,33 @@
 import { useEffect, useReducer, useState } from "react";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import useFetch from "./util";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import useFetch, { useJsonFetch } from "./util";
 
 const api_url = "http://localhost:8080/api/todo-item";
 
-async function submitItemAdd(item) {
+function useItemAddFetch(item) {
   const formData = new FormData();
   formData.append("title", item.title);
   formData.append("toggled", false);
-  return await fetch(api_url + "/new", { method: "POST", body: formData })
+
+  const { isLoading, result, error } = useJsonFetch(api_url + "/new", {
+    method: "POST",
+    body: formData,
+  });
+  return { isLoading, result, error };
+}
+
+function submitItemAdd(item) {
+  const formData = new FormData();
+  formData.append("title", item.title);
+  formData.append("toggled", false);
+
+  fetch(api_url + "/new", { method: "POST", body: formData })
     .then((result) => {
-      console.debug("submit new data result : ", result);
-      return result.json();
+      console.debug("add success");
     })
-    .then((result) => {
-      return result;
-    })
-    .catch((error) => {
-      console.error(error);
+    .catch((result) => {
+      console.debug(result);
     });
 }
 
@@ -106,7 +115,8 @@ function EditedTitle({ item, setEditFocus, onChangeTask }) {
       onKeyDown={(event) => {
         if (event.key === "Enter") {
           setEditFocus(null);
-          onChangeTask({ ...item, title: event.target.value });
+          const result = onChangeTask({ ...item, title: event.target.value });
+          console.debug(result);
         }
       }}
       onBlur={() => setEditFocus(null)}
@@ -200,40 +210,51 @@ function Alarm() {
   );
 }
 
-function Description({item, onChangeTask}){
-  const [description, setDescription] = useState(item.description)
-  console.debug('show description', item)
-  useEffect(()=>{
-    setDescription(item.description)
-  }, [item.description])
+function Description({ item, onChangeTask }) {
+  const [description, setDescription] = useState(item.description);
+  console.debug("show description", item);
+  useEffect(() => {
+    setDescription(item.description);
+  }, [item.description]);
 
-  return <>
-  <label htmlFor={"desc-" + item.id}>Todo Description</label>
-  <br/>
-  <textarea id={"desc-" + item.id} 
-  onChange={e => setDescription(e.target.value)}
-  defaultValue={description}
-  ></textarea>
-  <br/>
-  <input type="button" value="Save"
-  onClick={e => {onChangeTask({...item, description})}}
-  ></input>
-  </>
+  return (
+    <>
+      <label htmlFor={"desc-" + item.id}>Todo Description</label>
+      <br />
+      <textarea
+        id={"desc-" + item.id}
+        onChange={(e) => setDescription(e.target.value)}
+        defaultValue={description}
+      ></textarea>
+      <br />
+      <input
+        type="button"
+        value="Save"
+        onClick={(e) => {
+          onChangeTask({ ...item, description });
+        }}
+      ></input>
+    </>
+  );
 }
 
-function Details({item, detailActivated, onChangeTask}){
-   return detailActivated? (<><br/>
-   <Description item={item} onChangeTask={onChangeTask}></Description></>) : <></>;
+function Details({ item, detailActivated, onChangeTask }) {
+  return detailActivated ? (
+    <>
+      <br />
+      <Description item={item} onChangeTask={onChangeTask}></Description>
+    </>
+  ) : (
+    <></>
+  );
 }
-
-
 
 function Item({ item, onChangeTask, onDeleteTask, editFocus, setEditFocus }) {
-  const [detailActivated,setDetailActivated] = useState(false);
-  
+  const [detailActivated, setDetailActivated] = useState(false);
+
   return (
-        <>
-        <input
+    <>
+      <input
         id={"toggle-" + item.id}
         type="checkbox"
         checked={item.toggled}
@@ -250,108 +271,122 @@ function Item({ item, onChangeTask, onDeleteTask, editFocus, setEditFocus }) {
         editFocus={editFocus}
         setEditFocus={setEditFocus}
       ></ItemTitle>
-      <input type="button" value={detailActivated?"▲":"▼"}
-      onClick={() => setDetailActivated(!detailActivated)}></input>
+      <input
+        type="button"
+        value={detailActivated ? "▲" : "▼"}
+        onClick={() => setDetailActivated(!detailActivated)}
+      ></input>
       <input
         type="button"
         value="delete"
         // class="delete-button"
         onClick={() => onDeleteTask(item)}
       ></input>
-      <Details item={item} detailActivated={detailActivated} onChangeTask={onChangeTask}></Details>
-      </>
+      <Details
+        item={item}
+        detailActivated={detailActivated}
+        onChangeTask={onChangeTask}
+      ></Details>
+    </>
   );
 }
 
 function ItemList({ items, onChangeTask, onDeleteTask }) {
   const [editFocus, setEditFocus] = useState(null);
-  
+
   return (
     <ul>
-      {items.map((item) =>
-      {return (
-        <li key={item.id} id={"item-" + item.id}>
-            <Item item={item} onChangeTask={onChangeTask} onDeleteTask={onDeleteTask} editFocus={editFocus} setEditFocus={setEditFocus}/>
-         </li>)})}
+      {items.map((item) => {
+        return (
+          <li key={item.id} id={"item-" + item.id}>
+            <Item
+              item={item}
+              onChangeTask={onChangeTask}
+              onDeleteTask={onDeleteTask}
+              editFocus={editFocus}
+              setEditFocus={setEditFocus}
+            />
+          </li>
+        );
+      })}
     </ul>
   );
 }
 
-function OnError({error}){
-  useEffect(()=>{
-    toast("There is an error.")
-  },[error])
-  return (<ToastContainer/>)
+function OnError({ error }) {
+  useEffect(() => {
+    toast("There is an error.");
+  }, [error]);
+  return <ToastContainer />;
 }
 
-function TodoItemPage(){
-    const [items, dispatch] = useReducer(itemReducer, []);
-    const [newTitle, setNewTitle] = useState("");
-    const { isLoading, error, result } = useFetch(api_url + "/all");
-    function handleAddItem(item) {
-      dispatch({ type: "added", item: item });
+function TodoItemPage() {
+  const [items, dispatch] = useReducer(itemReducer, []);
+  const [newTitle, setNewTitle] = useState("");
+  const { isLoading, error, result } = useJsonFetch(api_url + "/all");
+
+  function handleAddItem(item) {
+    dispatch({ type: "added", item: item });
+  }
+
+  function handleChangeItem(item) {
+    submitItemAdd(item);
+    dispatch({ type: "changed", item: item });
+  }
+  function handleDeleteItem(item) {
+    submitItemDelete(item);
+    dispatch({ type: "deleted", item: item });
+  }
+  function handleClearItems() {
+    dispatch({ type: "cleared" });
+  }
+
+  useEffect(() => {
+    handleClearItems();
+    if (result) {
+      result.map(handleAddItem);
     }
-  
-    function handleChangeItem(item) {
-      submitItemChange(item);
-      dispatch({ type: "changed", item: item });
-    }
-    function handleDeleteItem(item) {
-      submitItemDelete(item);
-      dispatch({ type: "deleted", item: item });
-    }
-    function handleClearItems() {
-      dispatch({ type: "cleared" });
-    }
-  
-    useEffect(() => {
-      handleClearItems();
-      if (result) {
-        result.json().then((result) => 
-            {console.debug('load item', result);
-            result.map(handleAddItem)});
-      }
-      return () => handleClearItems();
-    }, [result]);
-    //const {isLoading, result, error} = useFetch(api_url + "/all");
-  
-  
-    return (
-      <>
-        <h1>Todo Item test</h1>
-        <input
-          type="text"
-          onChange={(e) => {
-            setNewTitle(e.target.value);
-          }}
-        ></input>
-        <input
-          type="button"
-          value="Add todo item"
-          onClick={(e) => {
-            submitItemAdd({ title: newTitle, toggled: false }).then((id) =>
-              handleAddItem({
-                id: id,
-                title: newTitle,
-                toggled: false,
-              })
-            );
-          }}
-        ></input>
-        <br />
-        {isLoading ? (
-          <div>now Loading...</div>
-        ) : error ? (
-          <OnError error={error}/>
-        ) : (
-          <ItemList
-            items={items}
-            onChangeTask={handleChangeItem}
-            onDeleteTask={handleDeleteItem}
-          />
-        )}
-      </>
-    );
+    return () => handleClearItems();
+  }, [result]);
+
+  //const {isLoading, result, error} = useFetch(api_url + "/all");
+
+  return (
+    <>
+      <h1>Todo Item test</h1>
+      <input
+        type="text"
+        onChange={(e) => {
+          setNewTitle(e.target.value);
+        }}
+      ></input>
+      <input
+        type="button"
+        value="Add todo item"
+        onClick={(e) => {
+          submitItemAdd({ title: newTitle, toggled: false }).then((id) =>
+            handleAddItem({
+              id: id,
+              title: newTitle,
+              toggled: false,
+            })
+          );
+        }}
+      ></input>
+      <br />
+      {isLoading ? (
+        <div>now Loading...</div>
+      ) : error ? (
+        <OnError error={error} />
+      ) : (
+        <ItemList
+          items={items}
+          onChangeTask={handleChangeItem}
+          onDeleteTask={handleDeleteItem}
+        />
+      )}
+    </>
+  );
 }
 
 export default TodoItemPage;
