@@ -36,19 +36,33 @@
     transform: rotate(360deg);
   }
 }
-.title-input {
-  color:black
+
+@layer cover, page;
+@layer page{
+  .title-input {
+    color:black
+  }
+  .delete-button{
+    color:red
+  }
+  
+  .toggled-item{
+    display:inline-block;
+    width:120px;
+  }
+  
+  .untoggled-item{
+    display:inline-block;
+    width:120px;
+  }
 }
-.delete-button{
-  color:red
+.block-screen{
+  filter: blur(4px);
+  user-select: none;
+  height: fit-content;
+  width: fit-content;
+  background-color: antiquewhite;
+  color: blue;
 }
 
-.toggled-item{
-  display:inline-block;
-  width:120px;
-}
 
-.untoggled-item{
-  display:inline-block;
-  width:120px;
-}

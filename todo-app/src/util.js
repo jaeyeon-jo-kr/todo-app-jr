@@ -32,7 +32,6 @@ export function useJsonFetch(url, init){
             .error(setJsonError)
             .finally(()=>setJsonLoading(false))
         }
-        result.json().then(json => setJsonResult(json)).catch()
     }, [error, isLoading,result])
 
     return {isLoading:jsonLoading, 

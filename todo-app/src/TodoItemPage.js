@@ -1,7 +1,17 @@
-import { useEffect, useReducer, useState } from "react";
+import {
+  useContext,
+  Children,
+  useEffect,
+  useReducer,
+  useState,
+  createContext,
+  useRef
+} from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import useFetch, { useJsonFetch } from "./util";
+import  { useJsonFetch } from "./util";
+
+const IsEnabledContext = createContext(true);
 
 const api_url = "http://localhost:8080/api/todo-item";
 
@@ -17,14 +27,15 @@ function useItemAddFetch(item) {
   return { isLoading, result, error };
 }
 
-function submitItemAdd(item) {
+async function submitItemAdd(item) {
   const formData = new FormData();
   formData.append("title", item.title);
   formData.append("toggled", false);
 
-  fetch(api_url + "/new", { method: "POST", body: formData })
+  return await fetch(api_url + "/new", { method: "POST", body: formData })
     .then((result) => {
       console.debug("add success");
+      return result.text()
     })
     .catch((result) => {
       console.debug(result);
@@ -99,9 +110,7 @@ function itemReducer(items, action) {
       return [];
     }
     case "initialized": {
-      const initItems = loadItems();
-      console.debug("init item : ", initItems);
-      return initItems;
+      return action.items;
     }
     default:
       throw Error("unknown action" + action.type);
@@ -313,19 +322,30 @@ function ItemList({ items, onChangeTask, onDeleteTask }) {
   );
 }
 
-function OnError({ error }) {
-  useEffect(() => {
-    toast("There is an error.");
-  }, [error]);
-  return <ToastContainer />;
+
+function WrapLoadingScreen({ children, isLoading }) {
+  return isLoading ? (
+    <div className="block-screen" inert="true">{Children.only(children)}</div>
+  ) : (
+    Children.only(children)
+  );
 }
 
-function TodoItemPage() {
+
+function TodoItemBody() {
   const [items, dispatch] = useReducer(itemReducer, []);
+  const [isLoading,setIsLoading] = useState(true)
   const [newTitle, setNewTitle] = useState("");
-  const { isLoading, error, result } = useJsonFetch(api_url + "/all");
+  const [error, setError] = useState(false);
+  const isEnabled = useContext(IsEnabledContext);
+  const abortRef = useRef();
+
+  function handleInitItems(items){
+    dispatch({type: "initialized", items:items})
+  }
 
   function handleAddItem(item) {
+    console.debug('handle add item:', item)
     dispatch({ type: "added", item: item });
   }
 
@@ -340,16 +360,28 @@ function TodoItemPage() {
   function handleClearItems() {
     dispatch({ type: "cleared" });
   }
+  
 
   useEffect(() => {
-    handleClearItems();
-    if (result) {
-      result.map(handleAddItem);
+    if(abortRef.current){
+        abortRef.current.abort();
     }
-    return () => handleClearItems();
-  }, [result]);
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
+    setIsLoading(true);
+    fetch(api_url + "/all",{signal})
+      .then((result) => result.json())
+      .then(handleInitItems)
+      .catch(setError)
+      .finally(() => setIsLoading(false));
+    return () => {
+        if(abortRef.current){
+            abortRef.current.abort();
+        }
+    };
+  }, []);
 
-  //const {isLoading, result, error} = useFetch(api_url + "/all");
+
 
   return (
     <>
@@ -376,8 +408,6 @@ function TodoItemPage() {
       <br />
       {isLoading ? (
         <div>now Loading...</div>
-      ) : error ? (
-        <OnError error={error} />
       ) : (
         <ItemList
           items={items}
@@ -386,6 +416,18 @@ function TodoItemPage() {
         />
       )}
     </>
+  );
+}
+
+function TodoItemPage() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  return (
+    <IsEnabledContext.Provider value={!isLoading}>
+        <WrapLoadingScreen isLoading={isLoading}>
+        <TodoItemBody isLoading={isLoading} setIsLoading={setIsLoading} />
+      </WrapLoadingScreen>
+    </IsEnabledContext.Provider>
   );
 }
 
