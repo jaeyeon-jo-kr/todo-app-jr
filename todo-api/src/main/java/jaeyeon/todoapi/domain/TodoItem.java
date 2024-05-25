@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 
 @Data
 public class TodoItem implements Serializable {
-    long id;
+    int id;
     String title;
     String description;
     boolean toggled;

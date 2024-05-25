@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/api/todo-item")
+@RequestMapping(value="/api/todo-item")
 @RestController
 public class TodoItemController {
     private TodoItemMapper mapper;
@@ -30,26 +30,28 @@ public class TodoItemController {
         return this.mapper.selectAllItems();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value="/{id}",consumes="application/json", produces="application/json")
     public TodoItem getAllItems(@PathVariable int id){
         return this.mapper.getItem(id);
     }
 
-    @PostMapping("/update")
+    @PostMapping(value="/update",consumes="application/json", produces="application/json")
     public int updateItem(TodoItem item)
     {
         return this.mapper.updateItem(item);
     }
 
-    @PostMapping("/delete")
-    public int deleteItem(int id)
+    @PostMapping(value="/delete",consumes="application/json", produces="application/json")
+    public int deleteItem(TodoItem item)
     {
+        int id = item.getId();
         return this.service.RemoveItem(id);
 
     }
 
-    @PostMapping("/new")
-    public int insertItem(TodoItem item){
+    @PostMapping(value="/new")
+    public int insertItem(@RequestBody TodoItem item){
+        System.out.println(item);
         return this.service.insertItem(item);
     }
 }
