@@ -1,83 +1,15 @@
 import {
-  useContext,
   Children,
   useEffect,
   useReducer,
   useState,
-  createContext,
-  useRef
+  createContext
 } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import  { useJsonFetch } from "./util";
+import { onSubmitItemChange, onSubmitItemDelete, onFetchItemsLoad, onSubmitItemAdd } from "./TodoItems";
 
 const IsEnabledContext = createContext(true);
-
-const api_url = "http://localhost:8080/api/todo-item";
-
-function useItemAddFetch(item) {
-  const formData = new FormData();
-  formData.append("title", item.title);
-  formData.append("toggled", false);
-
-  const { isLoading, result, error } = useJsonFetch(api_url + "/new", {
-    method: "POST",
-    body: formData,
-  });
-  return { isLoading, result, error };
-}
-
-async function submitItemAdd(item) {
-  const formData = new FormData();
-  formData.append("title", item.title);
-  formData.append("toggled", false);
-
-  return await fetch(api_url + "/new", { method: "POST", body: formData })
-    .then((result) => {
-      console.debug("add success");
-      return result.text()
-    })
-    .catch((result) => {
-      console.debug(result);
-    });
-}
-
-function submitItemDelete(item) {
-  const formData = new FormData();
-  formData.append("id", item.id);
-  fetch(api_url + "/delete", { method: "POST", body: formData })
-    .then((result) => {
-      console.debug("delete success");
-    })
-    .catch((result) => {
-      console.debug(result);
-    });
-}
-
-function submitItemChange(item) {
-  const formData = new FormData();
-  formData.append("id", item.id);
-  formData.append("title", item.title);
-  formData.append("description", item.description);
-  formData.append("toggled", item.toggled);
-  fetch(api_url + "/update", { method: "POST", body: formData })
-    .then((result) => {
-      console.debug("update success");
-    })
-    .catch((result) => {
-      console.debug(result);
-    });
-}
-
-async function loadItems() {
-  const items = fetch(api_url + "/all")
-    .then((response) => response.json())
-    .catch((error) => {
-      console.error(error);
-      return [];
-    });
-  return await items;
-}
 
 function itemReducer(items, action) {
   switch (action.type) {
@@ -322,89 +254,80 @@ function ItemList({ items, onChangeTask, onDeleteTask }) {
   );
 }
 
-
 function WrapLoadingScreen({ children, isLoading }) {
   return isLoading ? (
-    <div className="block-screen" inert="true">{Children.only(children)}</div>
+    <div className="block-screen" inert="true">
+      {Children.only(children)}
+    </div>
   ) : (
     Children.only(children)
   );
 }
 
+function ItemAdd({ handleAddItem }) {
+  const [newTitle, setNewTitle] = useState("");
+  function onSuccess(item){
+    return (result) => {
+      const newItem = {...item, id:result}
+      handleAddItem(newItem)
+    }
+  }
+  function afterError(error){
+    console.error(error);
+  }
+
+  return (
+    <>
+      <input type="text" 
+        onChange={(e) => setNewTitle(e.target.value)} />
+      <input
+        type="button"
+        value="Add todo item"
+        onClick={(e) => {
+          const newItem = { title: newTitle, toggled: false };
+          onSubmitItemAdd(
+            {item:newItem,
+              onSuccess:onSuccess(newItem),
+              onError:afterError});
+        }}
+      />
+    </>
+  );
+}
 
 function TodoItemBody() {
   const [items, dispatch] = useReducer(itemReducer, []);
-  const [isLoading,setIsLoading] = useState(true)
-  const [newTitle, setNewTitle] = useState("");
-  const [error, setError] = useState(false);
-  const isEnabled = useContext(IsEnabledContext);
-  const abortRef = useRef();
+  const [isLoading, setIsLoading] = useState(false);
 
-  function handleInitItems(items){
-    dispatch({type: "initialized", items:items})
+  function handleInitItems(items) {
+    dispatch({ type: "initialized", items: items });
+    setIsLoading(false);
   }
-
   function handleAddItem(item) {
-    console.debug('handle add item:', item)
     dispatch({ type: "added", item: item });
   }
 
   function handleChangeItem(item) {
-    submitItemAdd(item);
+    onSubmitItemChange({item})
     dispatch({ type: "changed", item: item });
   }
   function handleDeleteItem(item) {
-    submitItemDelete(item);
+    onSubmitItemDelete({item});
     dispatch({ type: "deleted", item: item });
   }
   function handleClearItems() {
     dispatch({ type: "cleared" });
   }
-  
-
-  useEffect(() => {
-    if(abortRef.current){
-        abortRef.current.abort();
-    }
-    abortRef.current = new AbortController();
-    const signal = abortRef.current.signal;
+  useEffect(()=> {
     setIsLoading(true);
-    fetch(api_url + "/all",{signal})
-      .then((result) => result.json())
-      .then(handleInitItems)
-      .catch(setError)
-      .finally(() => setIsLoading(false));
-    return () => {
-        if(abortRef.current){
-            abortRef.current.abort();
-        }
-    };
-  }, []);
-
+    onFetchItemsLoad({onSuccess: handleInitItems})
+  },[])
 
 
   return (
     <>
       <h1>Todo Item test</h1>
-      <input
-        type="text"
-        onChange={(e) => {
-          setNewTitle(e.target.value);
-        }}
-      ></input>
-      <input
-        type="button"
-        value="Add todo item"
-        onClick={(e) => {
-          submitItemAdd({ title: newTitle, toggled: false }).then((id) =>
-            handleAddItem({
-              id: id,
-              title: newTitle,
-              toggled: false,
-            })
-          );
-        }}
-      ></input>
+      <ItemAdd handleAddItem={handleAddItem} />
       <br />
       {isLoading ? (
         <div>now Loading...</div>
@@ -424,7 +347,7 @@ function TodoItemPage() {
 
   return (
     <IsEnabledContext.Provider value={!isLoading}>
-        <WrapLoadingScreen isLoading={isLoading}>
+      <WrapLoadingScreen isLoading={isLoading}>
         <TodoItemBody isLoading={isLoading} setIsLoading={setIsLoading} />
       </WrapLoadingScreen>
     </IsEnabledContext.Provider>
