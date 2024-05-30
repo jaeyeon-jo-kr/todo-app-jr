@@ -2,11 +2,10 @@ package jaeyeon.todoapi.domain;
 
 import lombok.Data;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
 @Data
-public class TodoAlarms {
+public class TodoAlarm {
     int id;
     int todoItemId;
     Timestamp reservedAt;
