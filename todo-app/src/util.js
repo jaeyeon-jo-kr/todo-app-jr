@@ -1,41 +1,20 @@
-import { useEffect, useState } from "react"
+import apiClient from "./apiClient";
 
-export function useFetch(url, init){
-    const [result, setResult] = useState(null);
-    const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    useEffect(()=> {
-        fetch(url, init)
-        .then((result) => setResult(result))
-        .catch(setError)
-        .finally(()=> {setIsLoading(false)})
-    }, [url,init])
-    
-
-    return {isLoading, result, error};
-}
-
-export function useJsonFetch(url, init){
-    const [jsonResult, setJsonResult] = useState(null);
-    const [jsonError, setJsonError] = useState(null);
-    const [jsonLoading, setJsonLoading] = useState(true);
-    const {isLoading, result, error} = useFetch(url,init);
-    useEffect(() => {
-        if(isLoading){
-            setJsonLoading(isLoading)
-        }else if(error){
-            setJsonError(error)
-        }else{
-            result
-            .json()
-            .then(setJsonResult)
-            .error(setJsonError)
-            .finally(()=>setJsonLoading(false))
-        }
-    }, [error, isLoading,result])
-
-    return {isLoading:jsonLoading, 
-            result:jsonResult, 
-            error:jsonError}
-
-}
+export function post({ url, params, onSuccess, onError }) {
+    apiClient
+      .post(url, params)
+      .then((result) =>
+        onSuccess ? onSuccess(result.data) : console.debug(result.data)
+      )
+      .catch((error) => (onError ? onError(error) : console.error(error)));
+  }
+  
+export function get({ url, query, onSuccess, onError }) {
+    apiClient
+      .get(url, query)
+      .then((result) =>
+        onSuccess ? onSuccess(result.data) : console.debug(result.data)
+      )
+      .catch((error) => (onError ? onError(error) : console.error(error)));
+  }
+  

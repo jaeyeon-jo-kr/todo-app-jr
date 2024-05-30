@@ -1,24 +1,5 @@
-import apiClient from "./apiClient";
-import { useEffect, useState } from "react";
-import { useFetcher } from "react-router-dom";
+import {get, post} from "./util"
 
-function post({ url, params, onSuccess, onError }) {
-  apiClient
-    .post(url, params)
-    .then((result) =>
-      onSuccess ? onSuccess(result.data) : console.debug(result.data)
-    )
-    .catch((error) => (onError ? onError(error) : console.error(error)));
-}
-
-function get({ url, query, onSuccess, onError }) {
-  apiClient
-    .get(url, query)
-    .then((result) =>
-      onSuccess ? onSuccess(result.data) : console.debug(result.data)
-    )
-    .catch((error) => (onError ? onError(error) : console.error(error)));
-}
 
 export function onFetchItemsLoad({ onSuccess }) {
   get({ url: "/todo-item/all", onSuccess });
