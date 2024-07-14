@@ -4,10 +4,12 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import TodoItemPage from "./TodoItemPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import axios from 'axios';
 
 const router = createBrowserRouter([
   {
@@ -20,12 +22,28 @@ const router = createBrowserRouter([
   }
 ]);
 
+const queryClient = new QueryClient(
+  {
+    defaultOptions:{
+      queries:{
+        queryFn: async ({queryKey : [url]}) =>{
+          const result = await axios.get('http://localhost:8080/api'+ url)
+          console.debug(result)
+          return result;
+        }
+      }
+    }
+  }
+)
+
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   </React.StrictMode>
 );
 
