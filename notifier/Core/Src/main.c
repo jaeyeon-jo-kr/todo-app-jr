@@ -336,6 +336,8 @@ void handle_input(int ch)
 	static int index = 0;
 	char output[32];
 
+	uart2_write(ch);
+
 	if('\r' == ch)
 	{
 		sprintf(output, "command : %s!\r\n", cmd);

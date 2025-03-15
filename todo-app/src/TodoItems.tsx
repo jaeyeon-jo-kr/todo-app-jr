@@ -1,5 +1,4 @@
-import {get, post} from "./util"
-
+import {get, post} from './util.tsx'
 
 export function onFetchItemsLoad({ onSuccess }) {
   get({ url: "/todo-item/all", onSuccess });

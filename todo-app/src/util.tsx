@@ -1,4 +1,4 @@
-import apiClient from "./apiClient";
+import apiClient from "./apiClient.tsx";
 
 export function post({ url, params, onSuccess, onError }) {
     apiClient

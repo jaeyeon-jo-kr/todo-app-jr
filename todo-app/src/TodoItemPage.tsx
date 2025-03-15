@@ -7,7 +7,8 @@ import {
 } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { onSubmitItemChange, onSubmitItemDelete, onFetchItemsLoad, onSubmitItemAdd } from "./TodoItems";
+import { onSubmitItemChange, onSubmitItemDelete, onFetchItemsLoad, onSubmitItemAdd } from "./TodoItems.tsx";
+import React from "react";
 
 const IsEnabledContext = createContext(true);
 
@@ -256,7 +257,7 @@ function ItemList({ items, onChangeTask, onDeleteTask }) {
 
 function WrapLoadingScreen({ children, isLoading }) {
   return isLoading ? (
-    <div className="block-screen" inert="true">
+    <div className="block-screen" >
       {Children.only(children)}
     </div>
   ) : (
@@ -295,9 +296,8 @@ function ItemAdd({ handleAddItem }) {
   );
 }
 
-function TodoItemBody() {
+function TodoItemBody({isLoading, setIsLoading}) {
   const [items, dispatch] = useReducer(itemReducer, []);
-  const [isLoading, setIsLoading] = useState(false);
 
   function handleInitItems(items) {
     dispatch({ type: "initialized", items: items });
@@ -320,8 +320,8 @@ function TodoItemBody() {
   }
   useEffect(()=> {
     setIsLoading(true);
-    onFetchItemsLoad({onSuccess: handleInitItems})
-  },[])
+    
+  })
 
 
   return (
