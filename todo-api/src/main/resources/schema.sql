@@ -1,38 +1,59 @@
-DROP TABLE IF EXISTS `TodoItem`;
-CREATE TABLE IF NOT EXISTS `TodoItem`(
-     `id`          INTEGER PRIMARY KEY AUTO_INCREMENT,
-     `title`       VARCHAR(100) NOT NULL,
-     `description` LONGTEXT,
-     `toggled`     BOOL DEFAULT false,
-     `created_at`     DATETIME DEFAULT CURRENT_TIMESTAMP,
-     `updated_at`     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
-DROP TABLE IF EXISTS `TodoItemRemoved`;
-CREATE TABLE IF NOT EXISTS `TodoItemRemoved`(
-     `id`          INTEGER,
-     `title`       VARCHAR(100) NOT NULL,
-     `description` LONGTEXT,
-     `toggled`     BOOL DEFAULT false,
-     `created_at`     DATETIME DEFAULT CURRENT_TIMESTAMP,
-     `updated_at`     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-     `removed_id`          INTEGER PRIMARY KEY AUTO_INCREMENT,
-     `removed_at` DATETIME DEFAULT CURRENT_TIMESTAMP);
-DROP TABLE IF EXISTS `TodoAlarm`;
-CREATE TABLE IF NOT EXISTS `TodoAlarm`(
-     `id`          INTEGER PRIMARY KEY AUTO_INCREMENT,
-     `todo_item_id` INTEGER NOT NULL,
-     `reserved_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-     `reserved` BOOL DEFAULT true,
-     `finished` BOOL DEFAULT false,
-     `created_at`     DATETIME DEFAULT CURRENT_TIMESTAMP,
-     `updated_at`     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
-DROP TABLE IF EXISTS `TodoAlarmRemoved`;
-CREATE TABLE IF NOT EXISTS `TodoAlarmRemoved`(
-     `id`          INTEGER,
-     `todo_item_id` INTEGER NOT NULL,
-     `reserved_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-     `reserved` BOOL DEFAULT true,
-     `finished` BOOL DEFAULT false,
-     `created_at`     DATETIME DEFAULT CURRENT_TIMESTAMP,
-     `updated_at`     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-     `removed_id`          INTEGER PRIMARY KEY AUTO_INCREMENT,
-     `removed_at` DATETIME DEFAULT CURRENT_TIMESTAMP);
+DROP TABLE IF EXISTS Geos;
+CREATE TABLE Geos(
+    id INT PRIMARY KEY,
+    lat FLOAT,
+    lng FLOAT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+DROP TABLE IF EXISTS Address;
+CREATE TABLE Address(
+    id INT PRIMARY KEY,
+    street VARCHAR(255) DEFAULT '',
+    suite VARCHAR(255) DEFAULT '',
+    city VARCHAR(255) DEFAULT '',
+    zipcode VARCHAR(255) DEFAULT '',
+    geo_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+DROP TABLE IF EXISTS Companies;
+CREATE TABLE Companies(
+    id INT PRIMARY KEY,
+    name VARCHAR(255) DEFAULT '',
+    catch_phrase VARCHAR(255) DEFAULT '',
+    bs VARCHAR(255) DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS Users;
+CREATE TABLE Users (
+     id INT PRIMARY KEY,
+     name VARCHAR(255) DEFAULT '',
+     username VARCHAR(255) DEFAULT '',
+     email VARCHAR(255) DEFAULT '',
+     address_id INT,
+     phone VARCHAR(255) DEFAULT '',
+     website VARCHAR(255) DEFAULT '',
+     company_id INT,
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+DROP TABLE IF EXISTS Posts;
+CREATE TABLE Posts (
+     id INT PRIMARY KEY,
+     user_id INT,
+     title VARCHAR(255) DEFAULT '',
+     body TEXT DEFAULT '',
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+DROP TABLE IF EXISTS Comments;
+CREATE TABLE Comments (
+     id INT PRIMARY KEY,
+     post_id INT,
+     name VARCHAR(255) DEFAULT '',
+     body TEXT DEFAULT '',
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
