@@ -12,11 +12,15 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
-    public List<Post> getAllPosts(){
-        return postRepository.findAll();
+    public List<Post> getAllPosts(int offset, int limit) {
+        return postRepository.findAll(offset, limit);
     }
 
-    public Post getPostsById(int id){
+    public Post getPostsById(int id) {
         return postRepository.findById(id);
+    }
+
+    public int getPostsCount() {
+        return postRepository.count();
     }
 }

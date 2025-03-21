@@ -24,30 +24,42 @@ public class PostRepository {
                 rs.getTimestamp("created_at"),
                 rs.getTimestamp("updated_at"));
     };
-    public List<Post> findAll(){
+
+    public List<Post> findAll(int offset, int limit) {
         var sql = """
-            SELECT id,
-                user_id,
-                title,
-                body,
-                created_at,
-                updated_at
-            FROM posts""";
+                SELECT id,
+                    user_id,
+                    title,
+                    body,
+                    created_at,
+                    updated_at
+                FROM posts
+                LIMIT ?
+                OFFSET ?
+                """;
 
         return jdbcTemplate
-                .query(sql, mapper);
+                .query(sql, mapper, limit, offset);
     }
-    public Post findById(int id)
-    {
+
+    public Post findById(int id) {
         var sql = """
-            SELECT id,
-                user_id,
-                title,
-                body,
-                created_at,
-                updated_at
-            FROM posts
-            WHERE id=?""";
+                SELECT id,
+                    user_id,
+                    title,
+                    body,
+                    created_at,
+                    updated_at
+                FROM posts
+                WHERE id=?""";
         return jdbcTemplate.queryForObject(sql, mapper, id);
+    }
+
+    public int count() {
+        var sql = """
+                SELECT COUNT(*)
+                FROM posts""";
+        Integer cnt = jdbcTemplate.queryForObject(sql, Integer.class);
+        return cnt == null ? 0 : cnt;
     }
 }

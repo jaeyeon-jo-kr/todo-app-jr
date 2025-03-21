@@ -1,4 +1,5 @@
 import React from "react";
+import "@/styles/post/styles.css";
 
 export default function PostView({ username, title, body }) {
   //Uiverse.io by Yaya12085

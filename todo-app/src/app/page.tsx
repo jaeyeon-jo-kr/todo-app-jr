@@ -1,11 +1,13 @@
-import PostPage from "@/pages/post/PostPage";
+import PostPage from "app/posts/pages/[index]/page";
 import "@/styles/styles.css";
 import { Suspense } from "react";
 
 export default function HomePage() {
   return (
     <div>
-      <PostPage />
+      <Suspense fallback={<div>Loading...</div>}>
+        <div>Test Post</div>
+      </Suspense>
     </div>
   );
 }
