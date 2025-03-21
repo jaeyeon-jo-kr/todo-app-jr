@@ -3,3 +3,4 @@ todo-api/gradle/wrapper/gradle-wrapper.jar
 .metadata/
 .vscode/
 **/.DS_Store
+.next/

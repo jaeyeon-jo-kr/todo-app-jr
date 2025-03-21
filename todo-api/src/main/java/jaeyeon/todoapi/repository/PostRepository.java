@@ -14,6 +14,16 @@ import java.util.function.Consumer;
 public class PostRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private final RowMapper<Post> mapper = (rs, rowNum) -> {
+        return new Post(rs.getInt("id"),
+                rs.getInt("user_id"),
+                "",
+                rs.getString("title"),
+                rs.getString("body"),
+                rs.getTimestamp("created_at"),
+                rs.getTimestamp("updated_at"));
+    };
     public List<Post> findAll(){
         var sql = """
             SELECT id,
@@ -23,14 +33,7 @@ public class PostRepository {
                 created_at,
                 updated_at
             FROM posts""";
-         RowMapper<Post> mapper = (rs, rowNum) -> {
-            return new Post(rs.getInt("id"),
-                    rs.getInt("user_id"),
-                    rs.getString("title"),
-                    rs.getString("body"),
-                    rs.getTimestamp("created_at"),
-                    rs.getTimestamp("updated_at"));
-        };
+
         return jdbcTemplate
                 .query(sql, mapper);
     }
@@ -45,14 +48,6 @@ public class PostRepository {
                 updated_at
             FROM posts
             WHERE id=?""";
-        RowMapper<Post> mapper = (rs, rowNum) -> {
-            return new Post(rs.getInt("id"),
-                    rs.getInt("user_id"),
-                    rs.getString("title"),
-                    rs.getString("body"),
-                    rs.getTimestamp("created_at"),
-                    rs.getTimestamp("updated_at"));
-        };
         return jdbcTemplate.queryForObject(sql, mapper, id);
     }
 }
