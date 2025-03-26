@@ -8,15 +8,14 @@ interface PostPaginationProps {
 }
 
 export default function PostPagination({ pageNumbers, currentPageNumber }: PostPaginationProps) {
-  console.debug(pageNumbers, currentPageNumber);
   return (
     <div>
       {pageNumbers.map((n) => {
         const pageNumber = n + 1;
         return (<div className="pagination" key={n}>
           <Link href={`/posts/pages/${pageNumber}`}>
-            <div className={currentPageNumber === pageNumber ? "active" : "deactive"}>
-              {pageNumber}
+            <div className={currentPageNumber == pageNumber ? "active" : "deactive"}>
+              <span>{pageNumber}</span>
             </div>
           </Link>
         </div>)

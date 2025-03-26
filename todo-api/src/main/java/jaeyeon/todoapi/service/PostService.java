@@ -23,4 +23,10 @@ public class PostService {
     public int getPostsCount() {
         return postRepository.count();
     }
+
+    public void createPost(Post newPost) {
+        postRepository.createPost(newPost);
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'createPost'");
+    }
 }

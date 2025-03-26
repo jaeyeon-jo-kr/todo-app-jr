@@ -1,4 +1,4 @@
-import PostView from "@/components/posts/PostView";
+import PostView from "@/components/posts/PostCard";
 import PostPagination from "@/components/posts/PostPagination";
 import Link from "next/link";
 

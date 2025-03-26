@@ -34,6 +34,9 @@
       ],
       "@/styles/*": [
         "styles/*"
+      ],
+      "@/types/*": [
+        "types/*"
       ]
     }
   },

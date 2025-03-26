@@ -62,4 +62,13 @@ public class PostRepository {
         Integer cnt = jdbcTemplate.queryForObject(sql, Integer.class);
         return cnt == null ? 0 : cnt;
     }
+
+    public void createPost(Post newPost) {
+        var sql = """
+                INSERT INTO posts
+                (user_id, title, body)
+                VALUES (?, ?, ?)
+                """;
+        jdbcTemplate.update(sql, newPost.userId(), newPost.title(), newPost.body());
+    }
 }
