@@ -11,6 +11,14 @@ type Post = {
     userId: number;
 };
 
+type PostStatistic = {
+    userId: number;
+    postCount: number;
+    year: number;
+    month: number;
+    increaseRate: number;
+};
+
 export const usePost = (id?: number) => {
     const [post, setPost] = useState<Post | null>(null);
     useEffect(() => {
@@ -80,4 +88,14 @@ export const usePostPage = () => {
 }
 
 export const usePostStatistics = () => {
-
+    const [postStatistics, setPostStatistics] = useState<PostStatistic[]>([]);
+    useEffect(() => {
+        getPostStatistics();
+    }, []);
+    const getPostStatistics = () => {
+        axios.get<PostStatistic[]>("http://localhost:8080/api/posts/stats")
+            .then(res => setPostStatistics(res.data))
+            .catch(err => console.error(err));
+    };
+    return { postStatistics };
+}

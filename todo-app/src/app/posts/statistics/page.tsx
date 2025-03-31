@@ -1,3 +1,5 @@
+import PostStatistics from "@/components/posts/PostStatistics";
+
 export default function StatisticsPage() {
-    return <div>Statistics</div>;
+    return <PostStatistics />;
 }
