@@ -1,6 +1,7 @@
 package jaeyeon.todoapi.controller;
 
 import jaeyeon.todoapi.domain.Post;
+import jaeyeon.todoapi.domain.PostStatistic;
 import jaeyeon.todoapi.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,5 +38,10 @@ public class PostController {
     @PostMapping("/new")
     public void createPost(Post newPost) {
         postService.createPost(newPost);
+    }
+
+    @GetMapping("/stats")
+    public List<PostStatistic> getPostCountByMonth() {
+        return postService.getPostCountByMonth();
     }
 }

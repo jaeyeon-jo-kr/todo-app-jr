@@ -1,4 +1,5 @@
 
+'use client'
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -51,13 +52,16 @@ export const usePostPage = () => {
         getPageCountQueryInfo();
     }, [currentPageNumber]);
 
+    useEffect(() => {
+        getPostList()
+    }, [offset, limit])
+
     const getPageCountQueryInfo = () => {
         axios.get<number>("http://localhost:8080/api/posts/cnt")
             .then(res => {
                 setTotalCount(res.data)
                 setOffset((currentPageNumber - 1) * limit)
                 setPageCount(Math.ceil(res.data / limit))
-                getPostList();
             })
             .catch(err => {
                 setTotalCount(0)
@@ -66,7 +70,6 @@ export const usePostPage = () => {
                 console.error(err)
             });
     };
-
     const getPostList = () => {
         axios.get(`http://localhost:8080/api/posts?offset=${offset}&limit=${limit}`)
             .then(res => setPostList(res.data))
@@ -75,3 +78,6 @@ export const usePostPage = () => {
 
     return { currentPageNumber, setCurrentPageNumber, postList, pageCount, totalCount }
 }
+
+export const usePostStatistics = () => {
+

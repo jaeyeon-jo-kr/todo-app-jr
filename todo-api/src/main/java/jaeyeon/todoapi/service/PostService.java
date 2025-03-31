@@ -1,7 +1,10 @@
 package jaeyeon.todoapi.service;
 
 import jaeyeon.todoapi.domain.Post;
+import jaeyeon.todoapi.domain.PostStatistic;
 import jaeyeon.todoapi.repository.PostRepository;
+import jaeyeon.todoapi.repository.PostStatisticsRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +14,9 @@ import java.util.List;
 public class PostService {
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private PostStatisticsRepository postStatisticsRepository;
 
     public List<Post> getAllPosts(int offset, int limit) {
         return postRepository.findAll(offset, limit);
@@ -26,7 +32,9 @@ public class PostService {
 
     public void createPost(Post newPost) {
         postRepository.createPost(newPost);
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createPost'");
+    }
+
+    public List<PostStatistic> getPostCountByMonth() {
+        return postStatisticsRepository.getPostCountByMonth();
     }
 }
